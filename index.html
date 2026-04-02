@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار التفكير الاستراتيجي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a1a;
+    --card: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.1);
+    --accent: #6366f1;
+    --accent2: #8b5cf6;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --dim: #475569;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.1) 0%, transparent 60%);
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; animation: fadeUp 0.4s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== WELCOME ===== */
+  #welcome {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    flex-direction: column;
+    text-align: center;
+  }
+  #welcome.active { display: flex; }
+  .welcome-icon { font-size: 80px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .welcome-title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 900;
+    background: linear-gradient(135deg, #a5b4fc, #c4b5fd, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .welcome-sub { color: var(--muted); font-size: 16px; margin-bottom: 40px; line-height: 1.8; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 500px;
+    width: 100%;
+    margin-bottom: 40px;
+  }
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px 12px;
+    backdrop-filter: blur(12px);
+  }
+  .stat-num { font-size: 32px; font-weight: 900; color: #a5b4fc; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .topics-list {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    max-width: 560px;
+    width: 100%;
+    margin-bottom: 36px;
+    text-align: right;
+  }
+  .topics-title { color: #a5b4fc; font-weight: 700; margin-bottom: 12px; font-size: 14px; }
+  .topic-tag {
+    display: inline-block;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: #a5b4fc;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    margin: 4px;
+  }
+  .btn-start {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    color: #fff;
+    padding: 18px 56px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    transition: all 0.3s ease;
+    box-shadow: 0 12px 32px rgba(99,102,241,0.4);
+    letter-spacing: 0.5px;
+  }
+  .btn-start:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(99,102,241,0.5); }
+
+  /* ===== QUIZ ===== */
+  #quiz { min-height: 100vh; padding: 24px; }
+  #quiz.active { display: block; }
+  .quiz-inner { max-width: 820px; margin: 0 auto; }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .quiz-title { font-size: 15px; font-weight: 700; color: var(--muted); }
+  .score-badge {
+    background: rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #a5b4fc;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .progress-wrap { margin-bottom: 6px; }
+  .progress-bar {
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--dim);
+    font-size: 12px;
+    margin-top: 6px;
+    margin-bottom: 20px;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 22px;
+    padding: 32px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    margin-bottom: 16px;
+  }
+  .topic-badge {
+    display: inline-block;
+    background: rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.35);
+    color: #818cf8;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .q-text {
+    font-size: clamp(16px, 2.5vw, 19px);
+    font-weight: 700;
+    line-height: 1.8;
+    color: #f1f5f9;
+    margin-bottom: 28px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: right;
+    width: 100%;
+    font-family: 'Cairo', sans-serif;
+  }
+  .option:hover { background: rgba(255,255,255,0.09); border-color: rgba(99,102,241,0.4); transform: translateX(-3px); }
+  .option.correct { background: rgba(16,185,129,0.15) !important; border-color: #10b981 !important; cursor: default; transform: none !important; }
+  .option.wrong { background: rgba(239,68,68,0.15) !important; border-color: #ef4444 !important; cursor: default; transform: none !important; }
+  .option.dim { background: rgba(255,255,255,0.02) !important; border-color: rgba(255,255,255,0.04) !important; cursor: default; transform: none !important; }
+  .option.disabled { cursor: default; }
+  .opt-label {
+    min-width: 30px;
+    height: 30px;
+    background: rgba(255,255,255,0.08);
+    color: var(--muted);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .option.correct .opt-label { background: var(--green); color: #fff; }
+  .option.wrong .opt-label { background: var(--red); color: #fff; }
+  .option.dim .opt-label { background: rgba(255,255,255,0.04); color: var(--dim); }
+  .opt-text { color: #cbd5e1; font-size: 15px; line-height: 1.7; }
+  .option.correct .opt-text { color: #6ee7b7; }
+  .option.wrong .opt-text { color: #fca5a5; }
+  .option.dim .opt-text { color: var(--dim); }
+
+  .explanation {
+    margin-top: 20px;
+    background: rgba(99,102,241,0.08);
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 14px;
+    padding: 18px 20px;
+    animation: fadeUp 0.3s ease;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .exp-header { color: #818cf8; font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+  .exp-text { color: #c7d2fe; font-size: 14px; line-height: 1.9; }
+
+  .btn-next {
+    margin-top: 20px;
+    width: 100%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    color: #fff;
+    padding: 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 24px rgba(99,102,241,0.35);
+    display: none;
+  }
+  .btn-next.show { display: block; }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(99,102,241,0.45); }
+
+  /* Navigator dots */
+  .nav-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--dim);
+    transition: all 0.2s;
+  }
+  .dot.current { background: var(--accent); color: #fff; }
+  .dot.answered-correct { background: var(--green); color: #fff; }
+  .dot.answered-wrong { background: var(--red); color: #fff; }
+
+  /* ===== RESULTS ===== */
+  #results { min-height: 100vh; padding: 24px; }
+  #results.active { display: block; }
+  .results-inner { max-width: 720px; margin: 0 auto; text-align: center; padding-top: 20px; }
+  .result-icon { font-size: 72px; margin-bottom: 16px; }
+  .result-title { font-size: 36px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+  .result-grade { font-size: 22px; font-weight: 800; margin-bottom: 32px; }
+
+  .score-big {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .score-item { text-align: center; }
+  .score-num { font-size: 52px; font-weight: 900; line-height: 1; }
+  .score-lbl { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  .topic-stats {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 28px;
+    text-align: right;
+  }
+  .ts-title { font-size: 15px; font-weight: 800; color: #e2e8f0; margin-bottom: 16px; }
+  .ts-row { margin-bottom: 12px; }
+  .ts-labels { display: flex; justify-content: space-between; font-size: 13px; color: #cbd5e1; margin-bottom: 5px; }
+  .ts-bar-bg { background: rgba(255,255,255,0.08); border-radius: 99px; height: 7px; overflow: hidden; }
+  .ts-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+
+  .result-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 32px; }
+  .btn-review {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    padding: 14px 30px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .btn-review:hover { background: rgba(255,255,255,0.14); }
+  .btn-restart {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    color: #fff;
+    padding: 14px 30px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.2s;
+    box-shadow: 0 8px 24px rgba(99,102,241,0.35);
+  }
+  .btn-restart:hover { transform: translateY(-2px); }
+
+  /* ===== REVIEW ===== */
+  #review { min-height: 100vh; padding: 24px; }
+  #review.active { display: block; }
+  .review-inner { max-width: 820px; margin: 0 auto; }
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .btn-back {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,0.14); }
+  .review-counter { color: var(--muted); font-size: 14px; }
+  .review-nav { display: flex; gap: 10px; }
+  .btn-prev, .btn-next-r {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .btn-prev:disabled, .btn-next-r:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-next-r:not(:disabled) { background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; }
+  .review-result-tag {
+    margin-top: 14px;
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .q-card { padding: 22px 18px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat-num { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="welcome" class="screen active">
+  <div class="welcome-icon">📚</div>
+  <h1 class="welcome-title">اختبار التفكير الاستراتيجي</h1>
+  <p class="welcome-sub">
+    اختبر معلوماتك في الإدارة الاستراتيجية<br>
+    مع شرح تفصيلي لكل إجابة
+  </p>
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-num">65</div><div class="stat-label">سؤال</div></div>
+    <div class="stat-box"><div class="stat-num">9</div><div class="stat-label">محور</div></div>
+    <div class="stat-box"><div class="stat-num">MCQ</div><div class="stat-label">النوع</div></div>
+  </div>
+  <div class="topics-list">
+    <div class="topics-title">📌 المحاور المشمولة:</div>
+    <span class="topic-tag">الاختيار الاستراتيجي</span>
+    <span class="topic-tag">فجوة الأداء</span>
+    <span class="topic-tag">مصفوفة BCG</span>
+    <span class="topic-tag">مصفوفة ماكينزي GE</span>
+    <span class="topic-tag">البدائل الاستراتيجية</span>
+    <span class="topic-tag">استراتيجيات بورتر</span>
+    <span class="topic-tag">التنفيذ الاستراتيجي</span>
+    <span class="topic-tag">نموذج 7S</span>
+    <span class="topic-tag">الرقابة الاستراتيجية</span>
+  </div>
+  <button class="btn-start" onclick="startQuiz()">ابدأ الاختبار ←</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="quiz-inner">
+    <div class="top-bar">
+      <span class="quiz-title">اختبار التفكير الاستراتيجي</span>
+      <span class="score-badge" id="score-display">النقاط: 0</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="progress-labels">
+      <span id="q-counter">السؤال 1 من 65</span>
+      <span id="q-percent">0%</span>
+    </div>
+
+    <div class="q-card">
+      <div class="topic-badge" id="q-topic"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options-container"></div>
+      <div class="explanation" id="explanation">
+        <div class="exp-header" id="exp-header"></div>
+        <div class="exp-text" id="exp-text"></div>
+      </div>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()"></button>
+    </div>
+
+    <div class="nav-dots" id="nav-dots"></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="screen">
+  <div class="results-inner">
+    <div class="result-icon" id="result-icon">🎓</div>
+    <h1 class="result-title">انتهى الاختبار!</h1>
+    <div class="result-grade" id="result-grade"></div>
+    <div class="score-big">
+      <div class="score-item">
+        <div class="score-num" id="score-correct" style="color:#10b981">0</div>
+        <div class="score-lbl">إجابات صحيحة</div>
+      </div>
+      <div class="score-item">
+        <div class="score-num" id="score-wrong" style="color:#ef4444">0</div>
+        <div class="score-lbl">إجابات خاطئة</div>
+      </div>
+      <div class="score-item">
+        <div class="score-num" id="score-pct" style="color:#fff">0%</div>
+        <div class="score-lbl">النسبة المئوية</div>
+      </div>
+    </div>
+    <div class="topic-stats">
+      <div class="ts-title">📊 الأداء حسب المحور:</div>
+      <div id="topic-bars"></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-review" onclick="goToReview()">مراجعة الإجابات 📋</button>
+      <button class="btn-restart" onclick="restartQuiz()">إعادة الاختبار 🔄</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div id="review" class="screen">
+  <div class="review-inner">
+    <div class="review-header">
+      <button class="btn-back" onclick="backToResults()">← العودة للنتائج</button>
+      <span class="review-counter" id="review-counter">سؤال 1 من 65</span>
+      <div class="review-nav">
+        <button class="btn-prev" id="btn-prev" onclick="reviewPrev()">السابق</button>
+        <button class="btn-next-r" id="btn-next-r" onclick="reviewNext()">التالي →</button>
+      </div>
+    </div>
+    <div class="q-card" id="review-card">
+      <div class="topic-badge" id="r-topic"></div>
+      <div class="q-text" id="r-text"></div>
+      <div class="options" id="r-options"></div>
+      <div class="explanation show" id="r-explanation">
+        <div class="exp-header" id="r-exp-header"></div>
+        <div class="exp-text" id="r-exp-text"></div>
+      </div>
+      <div class="review-result-tag" id="r-result-tag"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  { id:1, topic:"الاختيار الاستراتيجي", question:"ما تعريف الاختيار الاستراتيجي؟", options:["هو قرار اختيار بديل من بين البدائل الاستراتيجية الذي يمثل أفضل تمثيل لرسالة المنظمة وأهدافها","هو عملية تحليل البيئة الداخلية والخارجية للمنظمة","هو وضع الخطط التشغيلية قصيرة الأمد للمنظمة","هو تحديد الهيكل التنظيمي المناسب للمنظمة"], correct:0, explanation:"الاختيار الاستراتيجي هو قرار اختيار بديل من بين البدائل الاستراتيجية الذي يمثل أفضل تمثيل لرسالة المنظمة وأهدافها الاستراتيجية، ويتضمن التركيز على بعض بدائل منتخبة." },
+  { id:2, topic:"الاختيار الاستراتيجي", question:"وفقاً للنظرية الموقفية، هل يوجد اختيار استراتيجي أمثل يصلح لجميع المنظمات؟", options:["نعم، هناك استراتيجية مثلى واحدة تصلح لجميع المنظمات","لا، لكن توجد استراتيجية مثلى تصلح لمنظمة معينة في ظروف معينة وفي وقت محدد","نعم، شريطة أن تكون المنظمات في نفس القطاع","لا توجد استراتيجية مثلى على الإطلاق"], correct:1, explanation:"وفقاً للنظرية الموقفية، لا يوجد اختيار استراتيجي أمثل يصلح لجميع المنظمات، لكن هناك استراتيجية مثلى تصلح لمنظمة معينة في ظروف معينة وفي وقت محدد." },
+  { id:3, topic:"فجوة الأداء", question:"ما المقصود بفجوة الأداء الفعلي للمنظمة؟", options:["الفرق بين الميزانية المخططة والميزانية الفعلية","الفرق بين الأداء المتوقع طبقاً للأهداف المخططة والأداء الفعلي","الفرق بين حجم المبيعات السنوي وحجم الإنتاج","الفرق بين عدد الموظفين المطلوبين والموظفين الفعليين"], correct:1, explanation:"فجوة الأداء الفعلي هي الفرق بين الأداء المتوقع طبقاً للأهداف المخططة والأداء الفعلي للمنظمة أو وحدة الأعمال." },
+  { id:4, topic:"فجوة الأداء", question:"إذا كانت فجوة الأداء صغيرة أو غير مهمة، فما الاختيار الاستراتيجي الأكثر احتمالاً؟", options:["استراتيجيات النمو والتوسع","استراتيجيات الانكماش","الاستقرار مع إجراء بعض التغييرات الثانوية","استراتيجية التصفية"], correct:2, explanation:"إذا كانت الفجوة صغيرة أو غير مهمة جداً فإن الاستقرار يكون هو الاختيار الاستراتيجي الأكثر احتمالاً، وقد يتم إجراء بعض التغييرات الثانوية بشكل جزئي." },
+  { id:5, topic:"فجوة الأداء", question:"إذا كانت فجوة الأداء إيجابية، فماذا تقود المنظمة إلى اتباع؟", options:["استراتيجيات انكماشية","استراتيجيات النمو","استراتيجية الاستقرار","استراتيجية التصفية"], correct:1, explanation:"عندما تكون الفجوة إيجابية فسوف تقود المنظمة لاتباع استراتيجيات النمو." },
+  { id:6, topic:"نماذج تحليل المحفظة", question:"ما الهدف الأساسي من نماذج تحليل محفظة الأعمال؟", options:["تحليل الهيكل التنظيمي للمنظمة","الكشف عن نقاط القوة والضعف في أداء أعمال المنظمات وتقييم محفظة الأعمال","تحديد الميزانية التشغيلية للمنظمة","دراسة سلوك المستهلكين في السوق"], correct:1, explanation:"تمثل نماذج تحليل المحفظة الأدوات الرئيسية التي تساعد المدراء الاستراتيجيين في الكشف عن نقاط القوة والضعف في أداء أعمال المنظمات المختلفة، وتقييم محفظة الأعمال." },
+  { id:7, topic:"مصفوفة BCG", question:"على ماذا يعتمد نموذج مجموعة بوسطن الاستشارية؟", options:["جاذبية الصناعة وقوة الأعمال","حصة السوق النسبية ومعدل نمو الصناعة","الربحية والسيولة النقدية","حجم المبيعات وعدد المنافسين"], correct:1, explanation:"يعتمد نموذج BCG على مصفوفة ذات بُعدين رئيسيين: البعد الأول هو حصة السوق النسبية (المحور الأفقي) والبعد الثاني هو نمو السوق (المحور العمودي)." },
+  { id:8, topic:"مصفوفة BCG", question:"كيف تحسب حصة السوق النسبية لوحدة الأعمال الاستراتيجية؟", options:["حصة السوق للوحدة مقسومة على إجمالي حصص السوق في الصناعة","المعدل لحصة سوق وحدة الأعمال إلى حصة سوق أكبر شركة منافسة في الصناعة","حصة السوق للوحدة مضروبة في معدل نمو الصناعة","المبيعات السنوية مقسومة على إجمالي مبيعات الصناعة"], correct:1, explanation:"حصة السوق النسبية عُرّفت بأنها المعدل لحصة سوق وحدة الأعمال الاستراتيجية إلى حصة السوق لأكبر شركة منافسة في الصناعة." },
+  { id:9, topic:"مصفوفة BCG", question:"إذا كانت حصة سوق وحدة الأعمال (أ) 10% وحصة السوق لأكبر المنافسين 30%، فما الحصة السوقية النسبية؟", options:["3.0","0.33","0.3","30"], correct:2, explanation:"الحصة السوقية النسبية = 10/30 = 0.3" },
+  { id:10, topic:"مصفوفة BCG - المربعات", question:"ما خصائص مربع علامات الاستفهام (؟) في مصفوفة BCG؟", options:["معدل نمو عالٍ في الصناعة وحصة سوقية منخفضة","معدل نمو منخفض وحصة سوقية عالية","معدل نمو عالٍ وحصة سوقية عالية","معدل نمو منخفض وحصة سوقية منخفضة"], correct:0, explanation:"وحدات أعمال علامات الاستفهام تتصف بدرجة نمو عالية في الصناعة وحصة سوقية منخفضة." },
+  { id:11, topic:"مصفوفة BCG - المربعات", question:"ما خصائص مربع النجوم (Stars) في مصفوفة BCG؟", options:["معدل نمو منخفض وحصة سوقية عالية","معدل نمو عالٍ وحصة سوقية عالية","معدل نمو عالٍ وحصة سوقية منخفضة","معدل نمو منخفض وحصة سوقية منخفضة"], correct:1, explanation:"تتصف وحدة الأعمال أو المنتجات في مربع النجوم بارتفاع معدل النمو وكذلك ارتفاع الحصة السوقية." },
+  { id:12, topic:"مصفوفة BCG - المربعات", question:"ما خصائص مربع ادرار النقدية (Cash Cows)؟", options:["حصة سوقية منخفضة ومعدل نمو بطيء","حصة سوقية كبيرة ومعدل نمو بطيء ومحدد","حصة سوقية عالية ومعدل نمو عالٍ","حصة سوقية منخفضة ومعدل نمو عالٍ"], correct:1, explanation:"تتصف وحدة الأعمال ضمن مربع ادرار النقدية بحصة سوقية كبيرة لكن بمعدل نمو بطيء ومحدد." },
+  { id:13, topic:"مصفوفة BCG - المربعات", question:"ما خصائص مربع الوضع المضطرب (Dogs)؟", options:["حصة سوقية منخفضة ومعدل نمو صناعي منخفض","حصة سوقية عالية ومعدل نمو منخفض","حصة سوقية منخفضة ومعدل نمو عالٍ","حصة سوقية عالية ومعدل نمو عالٍ"], correct:0, explanation:"تتسم وحدات الأعمال في مربع الوضع المضطرب (Dogs) بحصة سوقية منخفضة ومعدل نمو صناعي منخفض في السوق." },
+  { id:14, topic:"مصفوفة BCG - التوصيات", question:"ما التوصية الاستراتيجية للمنظمة عندما تعاني وحدة أعمال في مربع علامات الاستفهام من ضعف؟", options:["الاستمرار في الاستثمار بقوة","استراتيجية التصفية","اتباع استراتيجيات النمو","الاندماج مع منظمات أخرى"], correct:1, explanation:"عندما تعاني وحدات الأعمال في مربع علامات الاستفهام من ضعف أو أن معظم التوقعات بعيدة الأمد غير مشجعة، فالاستراتيجية المرشحة هي استراتيجية التصفية." },
+  { id:15, topic:"مصفوفة BCG - التوصيات", question:"ما نقاط قوة مصفوفة BCG؟", options:["تعتمد على أبعاد متعددة وتأخذ بعين الاعتبار جميع العوامل البيئية","ركزت على الاهتمام بالمستلزمات الضرورية لخلق تدفقات نقدية لأنواع مختلفة من وحدات الأعمال","تعتمد على تسعة مربعات وتوفر تحليلاً أكثر تفصيلاً","تأخذ في الاعتبار العوامل الاقتصادية والتكنولوجية"], correct:1, explanation:"من أهم جوانب القوة في مصفوفة BCG أنها ركزت الانتباه على الاهتمام بالمستلزمات الضرورية التي تساهم في خلق تدفقات نقدية لأنواع مختلفة من وحدات الأعمال." },
+  { id:16, topic:"مصفوفة BCG - نقاط الضعف", question:"ما أبرز نقاط ضعف نموذج مصفوفة مجموعة بوسطن الاستشارية؟", options:["يحتوي على تسعة مربعات مما يجعله معقداً جداً","النموذج مبسط لاحتوائه على بعدين فقط هما النمو في السوق وحصة المنتج في السوق","لا يمكن تطبيقه على المنظمات الكبيرة","لا يوفر أي توصيات استراتيجية واضحة"], correct:1, explanation:"يُعدّ النموذج مبسطاً لاحتوائه على بُعدين فقط هما النمو في السوق وحصة المنتج في السوق، في حين هناك عوامل أخرى مرتبطة بتلك الأبعاد ينبغي أخذها في الحسبان." },
+  { id:17, topic:"مصفوفة ماكينزي (GE)", question:"من طور نموذج مصفوفة ماكينزي (GE)؟", options:["مجموعة بوسطن الاستشارية","إدارة ماكينزي للاستشارات بالتعاون مع شركة جنرال الكترك","مايكل بورتر","شركة ماكدونالدز للوجبات السريعة"], correct:1, explanation:"طورت إدارة ماكينزي للاستشارات (Mckinsey) بالتعاون مع شركة جنرال الكترك نموذج محفظة أعمال تفادياً لنقاط الضعف التي ظهرت في نموذج مصفوفة BCG." },
+  { id:18, topic:"مصفوفة ماكينزي (GE)", question:"على ماذا تعتمد مصفوفة ماكينزي (GE)؟", options:["حصة السوق النسبية ومعدل نمو الصناعة","جاذبية الصناعة وقوة الأعمال/المركز التنافسي","الربحية والحصة السوقية فقط","معدل النمو الاقتصادي ومستوى التكنولوجيا"], correct:1, explanation:"تعتمد مصفوفة ماكينزي على تقييم بُعدين رئيسيين هما جاذبية الصناعة وقوة الأعمال/المركز التنافسي لوحدات الأعمال." },
+  { id:19, topic:"مصفوفة ماكينزي (GE)", question:"كم عدد مربعات مصفوفة ماكينزي (GE)؟", options:["4 مربعات","6 مربعات","9 مربعات","12 مربعاً"], correct:2, explanation:"تتضمن مصفوفة ماكينزي تسعة مربعات موزعة على بُعدين رئيسيين هما جاذبية الصناعة وقوة الأعمال/المركز التنافسي." },
+  { id:20, topic:"مصفوفة ماكينزي (GE)", question:"ما الاختيار الاستراتيجي الملائم للوحدات في مربعات الفائزين في مصفوفة ماكينزي؟", options:["استراتيجيات الانكماش والتصفية","استراتيجيات النمو والتوسع","الاستقرار والمحافظة على الوضع","استراتيجية الحصاد"], correct:1, explanation:"الاختيار الاستراتيجي الملائم لتلك الوحدات أو المنتجات التي تقع في مربعات الفائزين هي استراتيجيات النمو والتوسع." },
+  { id:21, topic:"مصفوفة ماكينزي (GE)", question:"كم مستوى يتضمنه كل بُعد في مصفوفة ماكينزي؟", options:["مستويين: قوي وضعيف","ثلاثة مستويات: قوي، متوسط، وضعيف","أربعة مستويات","خمسة مستويات"], correct:1, explanation:"يتم تحديد موقع وحدات الأعمال أو المنتجات لكل بُعد على ثلاثة مستويات هي قوي، ومتوسط، وضعيف على عكس مصفوفة BCG التي اقتصرت على مستويين." },
+  { id:22, topic:"مصفوفة ماكينزي (GE)", question:"ما نطاق الدرجات في تقييم جاذبية الصناعة لمصفوفة ماكينزي؟", options:["من 1 إلى 3 درجات","من 1 إلى 5 درجات","من 1 إلى 10 درجات","من 0 إلى 100"], correct:1, explanation:"يقوم المدراء الاستراتيجيون بإعطاء تقدير لمعدل الجاذبية لكل صناعة تتراوح بين (1-5) درجات، حيث تشير الدرجة (1) إلى جاذبية ضعيفة جداً والدرجة (5) إلى جاذبية مرتفعة جداً." },
+  { id:23, topic:"مصفوفة ماكينزي - مقارنة BCG", question:"ما أبرز ميزة لمصفوفة ماكينزي مقارنة بمصفوفة BCG؟", options:["أبسط في التطبيق وتحتاج بيانات أقل","إدخال العديد من العوامل لتحديد مواقع وحدات الأعمال بدلاً من الاقتصار على عاملي معدل النمو والحصة السوقية","تعتمد على بُعدين فقط مما يسهل التطبيق","لا توجد فروق جوهرية بين المصفوفتين"], correct:1, explanation:"تتميز مصفوفة ماكينزي بإدخال العديد من العوامل لتحديد مواقع وحدات الأعمال على المحورين الأفقي والعمودي بدلاً من الاقتصار على عاملي معدل النمو والحصة السوقية." },
+  { id:24, topic:"عوامل الاختيار الاستراتيجي", question:"ما العوامل المحددة والمؤثرة في نجاح الاختيار الاستراتيجي؟", options:["حجم المنظمة فقط","تمسك المنظمة بالاستراتيجيات السابقة، واتجاهات ذوي القوة والنفوذ، ومعيار المخاطرة، وعامل الوقت، وموارد المنظمة","درجة التنافس في الصناعة فقط","الربحية والسيولة المالية للمنظمة"], correct:1, explanation:"العوامل المحددة والمؤثرة في نجاح الاختيار الاستراتيجي هي: تمسك المنظمة بالاستراتيجيات السابقة أو الحالية، اتجاهات ذوي القوة والنفوذ، معيار المخاطرة، عامل الوقت، وموارد المنظمة." },
+  { id:25, topic:"عوامل الاختيار الاستراتيجي", question:"ما العلاقة بين درجة المخاطرة ودرجة الربح المحقق؟", options:["علاقة عكسية: كلما ازدادت المخاطرة انخفض الربح","لا توجد علاقة بين المخاطرة والربح","علاقة طردية ووثيقة: كلما ازدادت درجة المخاطرة ازدادت احتمالية تحقيق أرباح عالية","العلاقة مرتبطة فقط بنوع الصناعة"], correct:2, explanation:"هناك علاقة طردية ووثيقة بين درجة المخاطرة ودرجة الربح الذي يمكن تحقيقه، فكلما ازدادت درجة المخاطرة ازدادت معها احتمالية تحقيق أرباح عالية." },
+  { id:26, topic:"عوامل الاختيار الاستراتيجي", question:"ما الموارد التي تؤثر في الاختيار الاستراتيجي للمنظمة؟", options:["الموارد المادية فقط","الموارد المالية فقط","الموارد المادية والمالية والبشرية","الموارد التكنولوجية فقط"], correct:2, explanation:"موارد المنظمة تعد من العوامل المؤثرة في الاختيار الاستراتيجي، وهذه الموارد هي الموارد المادية والمالية والبشرية." },
+  { id:27, topic:"البدائل الاستراتيجية", question:"ما البدائل الاستراتيجية الأربعة الرئيسية على مستوى المنظمة؟", options:["التوسع، الانكماش، الاندماج، والتحالف","استراتيجيات الاستقرار، والنمو، والانكماش، والاستراتيجية المركبة","قيادة الكلفة، والتمييز، والتركيز، والتنويع","الاستحواذ، والمشاريع المشتركة، والتحالفات، والنمو الداخلي"], correct:1, explanation:"البدائل الاستراتيجية تنقسم إلى أربعة استراتيجيات رئيسية هي: استراتيجيات الاستقرار، واستراتيجيات النمو، واستراتيجيات الانكماش، والاستراتيجية المركبة." },
+  { id:28, topic:"استراتيجيات الاستقرار", question:"متى تُعدّ استراتيجيات الاستقرار مناسبة للمنظمة؟", options:["عندما تواجه المنظمة منافسة شديدة في السوق","عندما تعمل في صناعة مستقرة نسبياً وفي بيئة خارجية غير مضطربة","عندما تحتاج المنظمة إلى توسيع حصتها السوقية","عندما يكون الأداء المالي للمنظمة ضعيفاً"], correct:1, explanation:"استراتيجيات الاستقرار هي أفضل البدائل الاستراتيجية لمنظمة ناجحة تعمل في صناعة مستقرة نسبياً وفي بيئة خارجية غير مضطربة." },
+  { id:29, topic:"استراتيجيات الاستقرار", question:"ما المبررات وراء تبني المنظمات استراتيجيات الاستقرار؟", options:["الرغبة في التوسع السريع والنمو المتسارع","تمكن المنظمة من المحافظة على جهودها في مجالات الأعمال الحالية وعدم قدرتها على توفير الموارد للنمو","ضغوط المنافسين والأسواق الجديدة","رغبة المنظمة في الاندماج مع منظمات أخرى"], correct:1, explanation:"من أبرز المبررات: تمكن المنظمة من المحافظة على جهودها الإدارية، وجود تصور بأن الكلف الإضافية للأعمال الجديدة أكثر، وعدم قدرة المنظمة على توفير الموارد المادية والمالية والبشرية للنمو." },
+  { id:30, topic:"استراتيجيات الاستقرار", question:"ما الاستراتيجيات الفرعية ضمن استراتيجيات الاستقرار؟", options:["الانكماش، الحصاد، التصفية، والتحول","الثبات النسبي، التمركز، الربح، التريث، والحركة البطيئة","التركيز، النمو الداخلي، والتكامل الأفقي","قيادة الكلفة، التمييز، والتركيز"], correct:1, explanation:"تضم استراتيجيات الاستقرار عدة استراتيجيات فرعية هي: استراتيجية الثبات النسبي، التمركز، الربح، التريث، والحركة البطيئة." },
+  { id:31, topic:"استراتيجيات النمو", question:"ما الأسباب التي تدعو المنظمات لتبني استراتيجيات النمو؟", options:["الرغبة في تقليل حجم العمليات وخفض التكاليف","في الصناعات المضطربة استراتيجية الاستقرار قد تحقق نجاحاً قصير الأمد لكن مصيرها الفشل طويل الأمد","الرغبة في الانسحاب من الأسواق الحالية","تجنب المخاطرة وعدم اليقين"], correct:1, explanation:"في الصناعات المضطربة تستطيع استراتيجية الاستقرار أن تحقق نجاحاً قصير الأمد لكن مصيرها الفشل والانتهاء على الأمد الطويل، لذا تعتقد المنظمة بأن استراتيجيات النمو هي السبيل الوحيد للبقاء." },
+  { id:32, topic:"استراتيجيات النمو", question:"ما الاستراتيجيات الفرعية ضمن استراتيجيات النمو؟", options:["الاستقرار، والتصفية، والتحول","التركيز، النمو الداخلي، التكامل الأفقي، الاندماج، والمشروعات المشتركة","قيادة الكلفة، التمييز، والتركيز","التخفيض وإعادة التأهيل، والتجرد، والتصفية"], correct:1, explanation:"تضم استراتيجيات النمو عدة استراتيجيات فرعية هي: التركيز، النمو الداخلي، التكامل الأفقي، الاندماج، والمشروعات المشتركة." },
+  { id:33, topic:"استراتيجيات الانكماش", question:"متى تتبع المنظمات استراتيجيات الانكماش؟", options:["عندما تكون الفرص البيئية كثيرة","عندما يكون أداء وحدات الأعمال متدنياً ويستمر في التدهور","عندما ترغب المنظمة في التوسع في أسواق جديدة","عندما تكون الصناعة في مرحلة النمو السريع"], correct:1, explanation:"عندما يكون أداء وحدات الأعمال في المنظمات متدنياً، فلا بد من اتباع استراتيجيات انكماشية تتلاءم مع واقع أداء المنظمات المتدني." },
+  { id:34, topic:"استراتيجيات الانكماش", question:"ما أشكال استراتيجيات الانكماش؟", options:["الاندماج، الاستحواذ، والنمو الداخلي","التخفيض وإعادة التأهيل، التجرد، التحول، والتصفية","التركيز، قيادة الكلفة، والتمييز","الثبات النسبي، التمركز، والربح"], correct:1, explanation:"تتضمن استراتيجيات الانكماش أشكالاً متعددة من أهمها: استراتيجية التخفيض وإعادة التأهيل، التجرد، التحول، والتصفية." },
+  { id:35, topic:"الاستراتيجية المركبة", question:"متى تلجأ المنظمات لاتباع الاستراتيجية المركبة؟", options:["عندما تمارس المنظمة نشاطاً واحداً فقط","عندما تمارس أنشطة متعددة وكل نشاط استراتيجي يتطلب تبني استراتيجية مختلفة","عندما تكون المنظمة في مرحلة الشيخوخة","عندما تكون السوق مستقرة تماماً"], correct:1, explanation:"تلجأ المنظمات لاتباع الاستراتيجية المركبة عندما تمارس أنشطة متعددة وتضم وحدات نشاط أعمال متنوعة وكل نشاط استراتيجي يتطلب تبني استراتيجية قد تختلف عن استراتيجية وحدة نشاط استراتيجي آخر." },
+  { id:36, topic:"استراتيجيات بورتر", question:"من قدّم التصنيف الشائع للبدائل الاستراتيجية العامة للتنافس على مستوى وحدة الأعمال؟", options:["فيليب كوتلر","مايكل بورتر (Porter)","إيغور أنسوف","هنري مينتزبرغ"], correct:1, explanation:"المدخل أو التصنيف الشائع بين الكتاب والباحثين حول البدائل الاستراتيجية العامة للتنافس على مستوى وحدة الأعمال هو الذي قدمه بورتر (Porter)." },
+  { id:37, topic:"استراتيجيات بورتر", question:"ما هدف استراتيجية قيادة الكلفة؟", options:["تقديم منتج فريد بسعر مرتفع","تحقيق كلفة أقل في منتجاتها أو خدماتها المقدمة في السوق لتحقيق ميزة تنافسية","التركيز على قطاع صغير من السوق","الاندماج مع المنافسين لتقليل التنافس"], correct:1, explanation:"تتبع المنظمات هذه الاستراتيجية بغية تحقيق كلفة أقل في منتجاتها أو خدماتها المقدمة في السوق، ومن ثم تحقيق ميزة تنافسية على مستوى الصناعة ككل." },
+  { id:38, topic:"استراتيجيات بورتر", question:"ما المخاطر الأساسية لاستراتيجية قيادة الكلفة؟", options:["صعوبة تقديم منتج مميز","قابلية المتنافسين لإيجاد طرق للإنتاج بكلفة أقل، أو الحصول على مزايا كلفة من خلال وفورات كلفة العمل","صعوبة الحصول على حصة سوقية كبيرة","عدم قدرة المنظمة على تمييز منتجاتها"], correct:1, explanation:"المخاطر الأساسية لاستراتيجية قيادة الكلفة: قابلية المتنافسين لإيجاد طرق للإنتاج بكلفة أقل، والحصول على مزايا كلفة من خلال وفورات كلفة العمل، وقابلية المتنافسين لتقليد الطرق المتبعة." },
+  { id:39, topic:"استراتيجيات بورتر", question:"ما هدف استراتيجية التمييز (Differentiation)؟", options:["تحقيق أقل كلفة ممكنة في الإنتاج","تحقيق ميزة تنافسية من خلال تقديم منتج وخدمة فريدة للمستهلك","التركيز على قطاع صغير من السوق","تحقيق أكبر حصة سوقية ممكنة"], correct:1, explanation:"تستهدف الاستراتيجية العامة للتمييز تحقيق ميزة تنافسية للمنظمة من خلال ترسيخ مفاهيم تتعلق بالمستهلك تتيح له الحصول على منتج وخدمة فريدة." },
+  { id:40, topic:"استراتيجيات بورتر", question:"ما مجالات تحقيق الميزة التنافسية في استراتيجية التمييز؟", options:["تخفيض الأسعار وزيادة الإنتاج","تخفيض درجة المخاطرة والكلفة، تقديم منتج فريد، التفوق الفني، وتلبية الحاجات السيكولوجية للفرد","زيادة عدد نقاط البيع وتوسيع شبكة التوزيع","الاستثمار في البحث والتطوير فقط"], correct:1, explanation:"أهم مجالات تحقيق الميزة التنافسية في استراتيجية التمييز: تخفيض درجة المخاطرة والكلفة للمستهلك، تقديم منتج فريد في الأداء، التميز على أساس التفوق الفني، والقدرة على إشباع الحاجات السيكولوجية للفرد." },
+  { id:41, topic:"استراتيجيات بورتر", question:"ما أبرز المشاكل التي قد تظهر جراء تطبيق استراتيجية التمييز؟", options:["عدم قدرة المنظمة على تخفيض التكاليف","قابلية بعض المنافسين الجدد على تقليد المنتج المتميز بسهولة","صعوبة الحصول على تمويل كافٍ","ارتفاع تكاليف البحث والتطوير"], correct:1, explanation:"من أبرز مشاكل تطبيق استراتيجية التمييز: قدرة بعض المنافسين الجدد على تقليد المنتج المتميز بسهولة، وتهديد المتميز حيث أن مصدر التفرد قد يُستبعد." },
+  { id:42, topic:"استراتيجيات بورتر", question:"ما استراتيجية التركيز (Focus Strategy)؟", options:["التركيز على جميع قطاعات السوق بالتساوي","تظهر من خلال سببين: الأول نحو خدمة مجموعة معينة من المستهلكين، والثاني خدمة قطاع معين من السوق","التركيز على تخفيض التكاليف فقط","التركيز على الصادرات والأسواق الدولية"], correct:1, explanation:"الاستراتيجية العامة الثالثة هي استراتيجية التركيز التي تظهر من خلال سببين: الأول نحو خدمة حاجات مجموعة معينة من المستهلكين أو جزء من خط المنتجات، والثاني خدمة قطاع معين من السوق." },
+  { id:43, topic:"استراتيجيات بورتر", question:"ما مزايا تطبيق استراتيجية التركيز؟", options:["تمكن المنظمة من خدمة جميع قطاعات السوق","تركيز المنظمات على خلق ميزة تنافسية من خلال توفير المهارات والمؤهلات المتميزة القادرة على حماية المنظمة من المزاحمة","تساعد في تخفيض تكاليف الإنتاج بشكل كبير","تساعد في زيادة الحصة السوقية الإجمالية للمنظمة"], correct:1, explanation:"من مزايا تطبيق استراتيجية التركيز: تركيز المنظمات على خلق ميزة تنافسية من خلال توفير المهارات والمؤهلات المتميزة القادرة على حمايتها من المزاحمة بين المتنافسين." },
+  { id:44, topic:"التنفيذ الاستراتيجي", question:"ما تعريف التنفيذ الاستراتيجي؟", options:["هو عملية صياغة الأهداف الاستراتيجية للمنظمة","هو مجموعة من الأنشطة والفعاليات التي تمارس لوضع الاستراتيجية موضع التنفيذ من خلال البرامج التنفيذية والميزانيات والإجراءات","هو عملية تقييم البيئة الخارجية للمنظمة","هو تحليل نقاط القوة والضعف للمنظمة"], correct:1, explanation:"يعرف التنفيذ بأنه مجموعة من الأنشطة والفعاليات التي تمارس لوضع الاستراتيجية موضع التنفيذ من خلال البرامج التنفيذية والميزانيات والإجراءات." },
+  { id:45, topic:"التنفيذ الاستراتيجي", question:"أيهما أكثر صعوبة: الصياغة أم التنفيذ؟", options:["الصياغة دائماً أكثر صعوبة","التنفيذ غالباً أكثر صعوبة لكونه يتضمن أنشطة وعمليات فعلية","كلاهما متساويان في الصعوبة","الصعوبة تعتمد فقط على حجم المنظمة"], correct:1, explanation:"يكون التنفيذ غالباً أكثر صعوبة لكونه يتضمن أنشطة وعمليات فعلية، في حين أن الصياغة تهتم ببيان وتحليل العوامل المؤثرة قبل التنفيذ." },
+  { id:46, topic:"التنفيذ الاستراتيجي", question:"ما النتيجة عند وجود تخطيط مناسب وتنفيذ ممتاز؟", options:["فشل كامل","إمكانية إنقاذ التخطيط","نجاح كامل","عدم إمكانية الإنقاذ"], correct:2, explanation:"وفقاً لمصفوفة العلاقة التكاملية بين التخطيط والتنفيذ الاستراتيجي: التخطيط المناسب مع التنفيذ الممتاز يؤدي إلى نجاح كامل." },
+  { id:47, topic:"التنفيذ الاستراتيجي", question:"ما المتغيرات التنظيمية ذات الصلة بالتنفيذ الفعال للاستراتيجية؟", options:["معدل نمو الصناعة، الحصة السوقية، والربحية","إدارة التغيير، إدارة الهيكل، وإدارة الثقافة التنظيمية","معدل دوران العمالة، حجم الميزانية، والكفاءة الإنتاجية","درجة التنافس، حجم السوق، والقوة الشرائية"], correct:1, explanation:"يعتمد التنفيذ الفعال للاستراتيجية على ثلاثة متغيرات وثيقة الصلة بالتنفيذ هي: إدارة التغيير، إدارة الهيكل، وإدارة الثقافة التنظيمية." },
+  { id:48, topic:"التنفيذ الاستراتيجي", question:"كم مرحلة للتغيير الاستراتيجي للتنفيذ؟", options:["ثلاث مراحل","أربع مراحل","خمس مراحل","سبع مراحل"], correct:2, explanation:"هناك خمسة مراحل من التغيير الاستراتيجي للتنفيذ هي: الاستراتيجية المستقرة، التغيير الاستراتيجي الروتيني، التغيير الاستراتيجي المحدود، التغيير الراديكالي (الجذري)، والتوجه التنظيمي." },
+  { id:49, topic:"التنفيذ الاستراتيجي", question:"ما خصائص التغيير الراديكالي (الجذري)؟", options:["يتضمن تعديلات بسيطة في أساليب العمل","يحتاج إلى تحولات رئيسية في المنظمة وضروري لإكمال الاندماجات بين الشركات بنفس الصناعة الأساسية","يتضمن عرض منتجات جديدة للأسواق الجديدة","يعتمد على تعديلات اعتيادية تنبأ بها"], correct:1, explanation:"التغيير الراديكالي (الجذري) هو نوع من التغيير يحتاج إلى تحولات رئيسية في المنظمة وهو ضروري لإكمال الاندماجات بين الشركات بنفس الصناعة الأساسية." },
+  { id:50, topic:"الثقافة التنظيمية", question:"ما الآليات الأولية لتدعيم الثقافة التنظيمية؟", options:["تصميم الهيكل التنظيمي، والأنظمة والإجراءات التنظيمية","إلى ماذا ينتبه القادة ويقيسون ويسيطرون، وردود فعل القادة للحوادث الحرجة، ونمذجة الدور المقصود، ومعايير تخصيص المكافآت، ومعايير الاستقطاب والاختيار والترقية","القصص، الأساطير، والحكايات حول الأحداث والناس المهمين","تصميم المكان والواجهات والمباني المادية"], correct:1, explanation:"الآليات الأولية لتدعيم الثقافة التنظيمية هي: (1) إلى ماذا ينتبه القادة ويقيسون ويسيطرون، (2) ردود فعل القادة للحوادث الحرجة والأزمات التنظيمية، (3) نمذجة الدور المقصود وتعليمه وتدريبه، (4) معايير تخصيص المكافآت والمكانة، (5) معايير الاستقطاب والاختيار والترقية والتقاعد." },
+  { id:51, topic:"مداخل التنفيذ", question:"ما المدخل القائد في التنفيذ الاستراتيجي؟", options:["المدخل الذي يركز على إشراك جميع العاملين في صياغة الاستراتيجية","المدخل الذي يسمح للشباب بالتركيز على الأوجه الكمية والموضوعية للحالة ويركز المدير على صياغة الاستراتيجية وتطبيق المنطق والتحليل","المدخل الذي يعتمد على تغيير الهيكل التنظيمي والعاملين","المدخل الذي يعتمد على صياغة الاستراتيجية بشكل تلقائي"], correct:1, explanation:"المدخل القائد هو مدخل يسمح للشباب بالتركيز على الأوجه الكمية والموضوعية للحالة بدلاً من التعليمات السلوكية النوعية والذاتية، ويركز المدير على صياغة الاستراتيجية وتطبيق المنطق والتحليل." },
+  { id:52, topic:"مداخل التنفيذ", question:"ما المدخل التعاوني في التنفيذ الاستراتيجي؟", options:["المدير يصوغ الاستراتيجية بمفرده دون مشاركة الآخرين","المدير المسؤول يدعو بقية فريق الإدارة للبدء بصياغة الاستراتيجية ويعمل كمنسق","المدير يعتمد على تغيير الهيكل التنظيمي فقط","المدير يصغ وينفذ الاستراتيجية بصورة تلقائية"], correct:1, explanation:"في المدخل التعاوني يدعو المدير المسؤول عن الاستراتيجية بقية فريق الإدارة للبدء بصياغة الاستراتيجية وتعبيرات التنفيذ ويعمل كمنسق مستعملاً ديناميكية الجماعة." },
+  { id:53, topic:"نموذج ماكينزي 7S", question:"ما العناصر السبعة في نموذج ماكينزي لتنفيذ الاستراتيجية؟", options:["الرؤية، الرسالة، الأهداف، السياسات، البرامج، الميزانية، الإجراءات","الاستراتيجية، الهيكل، الأنظمة، نمط الإدارة، الهيئة الإدارية، القيم المشتركة، المهارات","التحليل، التخطيط، التنظيم، التوجيه، الرقابة، التقييم، التطوير","الكفاءة، الفعالية، الجودة، الإنتاجية، الربحية، النمو، الاستدامة"], correct:1, explanation:"نموذج ماكينزي يوضح العناصر التنظيمية السبعة الضرورية لنجاح تطبيق الاستراتيجية وهي: الاستراتيجية (Strategy)، الهيكل (Structure)، الأنظمة (Systems)، نمط الإدارة (Style)، الهيئة الإدارية (Staff)، القيم المشتركة (Shared Value)، المهارات (Skills)." },
+  { id:54, topic:"نموذج ماكينزي 7S", question:"ما المقصود بعنصر الأنظمة (Systems) في نموذج ماكينزي 7S؟", options:["الهيكل التنظيمي الرسمي للمنظمة","عمليات التشغيل التي تظهر التدفقات ومراحل العمل لمختلف الأنشطة المنظمية والعمليات","فلسفة الإدارة التنظيمية وتوجهها الفكري","القيم والطموحات التي يتطلع إليها العاملون"], correct:1, explanation:"الأنظمة هي عمليات التشغيل التي تظهر التدفقات ومراحل العمل أولاً بأول لمختلف الأنشطة المنظمية والعمليات بما فيها أنظمة المعلومات والرقابة والحوافز والجذب والاستقطاب." },
+  { id:55, topic:"نموذج ماكينزي 7S", question:"ما الأنظمة الإدارية المساندة لتنفيذ الاستراتيجية؟", options:["النظام المالي، نظام الموارد البشرية، نظام المعلومات","البرامج، الموازنة، الإجراءات","الهيكل التنظيمي، القيادة، الثقافة التنظيمية","التخطيط، التنظيم، التوجيه، الرقابة"], correct:1, explanation:"الأنظمة الإدارية المساندة لتنفيذ الاستراتيجية يمكن إيجازها في: البرامج، الموازنة، والإجراءات." },
+  { id:56, topic:"نموذج ماكينزي 7S", question:"ما البرنامج في سياق التنفيذ الاستراتيجي؟", options:["هو بيان بالأنشطة أو الخطوات المطلوبة لتحقيق خطة مفردة الاستعمال","هو بيان لبرامج المنظمة معبراً عنها بصورة نقدية","هو نظام يتكون من خطوات متتابعة تحدد طريقة أداء مهمة أو وظيفة معينة","هو الفرق بين الأداء المتوقع والأداء الفعلي"], correct:0, explanation:"البرنامج هو بيان بالأنشطة أو الخطوات المطلوبة لتحقيق خطة مفردة الاستعمال، والهدف منه هو جعل الاستراتيجية محددة الخطوات." },
+  { id:57, topic:"نموذج ماكينزي 7S", question:"ما الموازنة في سياق التنفيذ الاستراتيجي؟", options:["هي بيان بالأنشطة أو الخطوات المطلوبة لتحقيق خطة مفردة","هي بيان لبرامج المنظمة معبراً عنها بصورة نقدية، أي أنها توضيح للتكاليف التفصيلية لكل برنامج لأغراض التخطيط والرقابة","هي نظام يتكون من خطوات متتابعة تحدد طريقة أداء مهمة","هي مجموع الأصول الثابتة والمتداولة للمنظمة"], correct:1, explanation:"الموازنة هي بيان لبرامج المنظمة معبراً عنها بصورة نقدية، أي أنها توضيح للتكاليف التفصيلية لكل برنامج لأغراض التخطيط والرقابة." },
+  { id:58, topic:"الرقابة الاستراتيجية", question:"ما تعريف الرقابة الاستراتيجية؟", options:["هي عملية تحليل البيئة الخارجية للمنظمة","هي نوع خاص من الرقابة المنظمية التي تركز على مراقبة وتقويم عملية الإدارة الاستراتيجية للتأكد من أنها تعمل بالشكل الصحيح","هي مراقبة الميزانية السنوية للمنظمة","هي تقييم الهيكل التنظيمي للمنظمة"], correct:1, explanation:"الرقابة الاستراتيجية هي نوع خاص من الرقابة المنظمية التي تركز على مراقبة وتقويم عملية الإدارة الاستراتيجية للتأكد من أنها تعمل بالشكل الصحيح وضمان تحقيق النتائج التي سبق التخطيط لها." },
+  { id:59, topic:"الرقابة الاستراتيجية", question:"ما الفرق الرئيسي بين الرقابة الاستراتيجية والرقابة من خلال الموازنة؟", options:["لا يوجد فرق بينهما","الرقابة الاستراتيجية فترتها الزمنية أطول وتشمل داخل وخارج المنظمة، بينما رقابة الموازنة فترتها سنة فأقل وتركز على الأنشطة الداخلية","الرقابة الاستراتيجية تركز فقط على المعايير الكمية","رقابة الموازنة أشمل وأوسع من الرقابة الاستراتيجية"], correct:1, explanation:"الفرق الرئيسي: الرقابة الاستراتيجية فترتها الزمنية أطول وتتراوح بين عدة سنوات وأكثر من عشر سنوات، مقاييسها كمية ونوعية، وتشمل داخل وخارج المنظمة. أما رقابة الموازنة فالفترة الزمنية سنة فأقل، والمقاييس كمية فقط، والتركيز على الأنشطة الداخلية." },
+  { id:60, topic:"الرقابة الاستراتيجية", question:"ما مستويات الرقابة الاستراتيجية الثلاثة؟", options:["الرقابة الإدارية، الرقابة التشغيلية، والرقابة التقنية","الرقابة على المستوى الاستراتيجي، والرقابة على المستوى التكتيكي، والرقابة على المستوى التشغيلي","الرقابة الداخلية، الرقابة الخارجية، والرقابة الذاتية","الرقابة المالية، الرقابة الإدارية، والرقابة الاجتماعية"], correct:1, explanation:"تصنف الرقابة الاستراتيجية إلى ثلاثة مستويات: الرقابة على المستوى الاستراتيجي (Strategic Control)، والرقابة على المستوى التكتيكي (Tactical Control)، والرقابة على المستوى التشغيلي (Operational Control)." },
+  { id:61, topic:"الرقابة الاستراتيجية", question:"ما خطوات الرقابة الاستراتيجية الخمس؟", options:["التخطيط، التنظيم، التوجيه، الرقابة، التقييم","تحديد ما مطلوب قياسه، وضع معايير الأداء، قياس الأداء الفعلي، مقارنة الأداء الفعلي مع المعايير، اتخاذ الإجراءات التصحيحية","التحليل، التفسير، التقييم، المعالجة، الاستنتاج","جمع البيانات، تحليلها، تفسيرها، إعداد التقارير، المتابعة"], correct:1, explanation:"خطوات الرقابة الاستراتيجية الخمس هي: (1) تحديد ما مطلوب قياسه، (2) وضع معايير الأداء القياسية، (3) قياس الأداء الفعلي، (4) مقارنة الأداء الفعلي مع المعايير، (5) اتخاذ الإجراءات التصحيحية." },
+  { id:62, topic:"الرقابة الاستراتيجية", question:"ما أبرز مشكلات الرقابة الاستراتيجية؟", options:["ارتفاع تكاليف الرقابة وصعوبة تطبيقها","توجه المدراء نحو تحليل الآثار قصيرة الأمد وإهمال الآثار البعيدة الأمد، ومشكلة استبدال الأهداف","صعوبة الحصول على البيانات الكمية الدقيقة","عدم وجود كوادر بشرية مؤهلة لتطبيق الرقابة"], correct:1, explanation:"من أبرز مشكلات الرقابة الاستراتيجية: توجه المدراء نحو تحليل الآثار قصيرة الأمد وإهمالهم الآثار البعيدة الأمد، ومشكلة استبدال الأهداف التي تحدث عندما تصبح الأنشطة المساعدة لتحقيق الأهداف هي الأهداف نفسها." },
+  { id:63, topic:"الرقابة الاستراتيجية", question:"ما المستلزمات الضرورية لتحقيق الرقابة الاستراتيجية الفعالة؟", options:["زيادة عدد المراقبين في المنظمة","اقتصار نظام الرقابة على الحد الأدنى من المعلومات، بناء مقاييس نوعية وكمية، مراعاة عنصر الزمن، وشمولية النظام","الاعتماد فقط على الرقابة المالية","تطبيق نظام الرقابة على المستوى الإداري الأعلى فقط"], correct:1, explanation:"من متطلبات الرقابة الاستراتيجية: اقتصار نظام الرقابة على الحد الأدنى من المعلومات اللازمة لإعطاء صورة حقيقية عن الأحداث، بناء بعض المقاييس النوعية والكمية، مراعاة عنصر الزمن، وشمولية نظام الرقابة للمدى القريب والبعيد." },
+  { id:64, topic:"مصفوفة BCG - التوصيات", question:"ما الهدف من مصفوفة محفظة BCG على المدى البعيد؟", options:["تحويل موقع النجوم إلى موقع ادرار النقدية","تحويل موقع علامات الاستفهام إلى موقع النجومية","تحويل موقع ادرار النقدية إلى الوضع المضطرب","الحفاظ على الوضع الراهن دون تغيير"], correct:1, explanation:"الهدف على الأمد البعيد لمحفظة الأعمال هو تحويل موقع علامات الاستفهام إلى موقع النجومية خصوصاً عندما تمتلك وحدات الأعمال أو المنتجات معدلات نمو عالية تساعدها للانتقال إلى النجومية." },
+  { id:65, topic:"مصفوفة BCG", question:"ماذا يمثل معدل النمو الصناعي الأسرع في مصفوفة BCG؟", options:["جانب تهديد للوحدات الاستراتيجية","قوة، بينما النمو المنخفض في الصناعة يمثل جانب تهديد","لا يؤثر في تصنيف الوحدات","يشير دائماً إلى ضرورة الانكماش"], correct:1, explanation:"يتميز معدل النمو الصناعي الأسرع بامتلاكه نمو عالٍ. بكلمات أخرى، معدل النمو العالي في الصناعة يمثل قوة، والنمو المنخفض يمثل جانب تهديد." }
+];
+
+// ===== STATE =====
+let current = 0;
+let score = 0;
+let answered = [];
+let reviewIndex = 0;
+const labels = ["أ","ب","ج","د"];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  current = 0; score = 0; answered = [];
+  showScreen('quiz');
+  renderQuestion();
+  buildDots();
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('q-topic').textContent = q.topic;
+  document.getElementById('q-text').textContent = q.question;
+  document.getElementById('score-display').textContent = 'النقاط: ' + score;
+  document.getElementById('q-counter').textContent = `السؤال ${current+1} من ${questions.length}`;
+  document.getElementById('q-percent').textContent = Math.round((current/questions.length)*100) + '%';
+  document.getElementById('progress-fill').style.width = ((current/questions.length)*100) + '%';
+
+  const cont = document.getElementById('options-container');
+  cont.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="opt-label">${labels[i]}</span><span class="opt-text">${opt}</span>`;
+    btn.onclick = () => selectOption(i, btn);
+    cont.appendChild(btn);
+  });
+
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('btn-next').classList.remove('show');
+  updateDots();
+}
+
+function selectOption(idx, clickedBtn) {
+  const q = questions[current];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => o.onclick = null);
+
+  const isCorrect = idx === q.correct;
+  if (isCorrect) score++;
+
+  answered.push({ questionId: q.id, selected: idx, correct: q.correct, isCorrect });
+
+  opts.forEach((o, i) => {
+    if (i === q.correct) o.classList.add('correct');
+    else if (i === idx && !isCorrect) o.classList.add('wrong');
+    else o.classList.add('dim');
+    o.classList.add('disabled');
+  });
+
+  // Update correct label icons
+  opts[q.correct].querySelector('.opt-label').textContent = '✓';
+  if (!isCorrect) opts[idx].querySelector('.opt-label').textContent = '✗';
+
+  document.getElementById('exp-header').textContent = isCorrect ? '✅ إجابة صحيحة!' : '❌ إجابة خاطئة';
+  document.getElementById('exp-text').textContent = q.explanation;
+  document.getElementById('explanation').classList.add('show');
+
+  const btnNext = document.getElementById('btn-next');
+  btnNext.textContent = current < questions.length - 1 ? 'السؤال التالي ←' : 'عرض النتائج 🏆';
+  btnNext.classList.add('show');
+
+  updateDots();
+  document.getElementById('score-display').textContent = 'النقاط: ' + score;
+}
+
+function nextQuestion() {
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function buildDots() {
+  const cont = document.getElementById('nav-dots');
+  cont.innerHTML = '';
+  questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    d.textContent = i + 1;
+    cont.appendChild(d);
+  });
+}
+
+function updateDots() {
+  questions.forEach((_, i) => {
+    const d = document.getElementById('dot-' + i);
+    if (!d) return;
+    d.className = 'dot';
+    const ans = answered.find(a => a.questionId === questions[i].id);
+    if (i === current) d.classList.add('current');
+    else if (ans) d.classList.add(ans.isCorrect ? 'answered-correct' : 'answered-wrong');
+  });
+}
+
+function showResults() {
+  showScreen('results');
+  const total = questions.length;
+  const wrong = total - score;
+  const pct = Math.round((score/total)*100);
+
+  document.getElementById('score-correct').textContent = score;
+  document.getElementById('score-wrong').textContent = wrong;
+  document.getElementById('score-pct').textContent = pct + '%';
+
+  let icon, grade, color;
+  if (pct >= 90) { icon='🏆'; grade='ممتاز'; color='#10b981'; }
+  else if (pct >= 80) { icon='⭐'; grade='جيد جداً'; color='#3b82f6'; }
+  else if (pct >= 70) { icon='👍'; grade='جيد'; color='#8b5cf6'; }
+  else if (pct >= 60) { icon='📚'; grade='مقبول'; color='#f59e0b'; }
+  else { icon='📖'; grade='يحتاج مراجعة'; color='#ef4444'; }
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-grade').textContent = grade;
+  document.getElementById('result-grade').style.color = color;
+
+  const topics = [...new Set(questions.map(q => q.topic))];
+  const barsEl = document.getElementById('topic-bars');
+  barsEl.innerHTML = '';
+  topics.forEach(topic => {
+    const topicQs = questions.filter(q => q.topic === topic);
+    const topicAnswered = answered.filter(a => topicQs.find(q => q.id === a.questionId));
+    const correct = topicAnswered.filter(a => a.isCorrect).length;
+    const total = topicQs.length;
+    const pct = total > 0 ? Math.round((correct/total)*100) : 0;
+    const barColor = pct >= 70 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+    barsEl.innerHTML += `
+      <div class="ts-row">
+        <div class="ts-labels"><span>${topic}</span><span style="color:${barColor};font-weight:800">${correct}/${total}</span></div>
+        <div class="ts-bar-bg"><div class="ts-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div>`;
+  });
+}
+
+function goToReview() {
+  reviewIndex = 0;
+  renderReview();
+  showScreen('review');
+}
+
+function backToResults() {
+  showScreen('results');
+}
+
+function renderReview() {
+  const q = questions[reviewIndex];
+  const ra = answered.find(a => a.questionId === q.id);
+  document.getElementById('r-topic').textContent = q.topic;
+  document.getElementById('r-text').textContent = q.question;
+  document.getElementById('review-counter').textContent = `سؤال ${reviewIndex+1} من ${questions.length}`;
+
+  const cont = document.getElementById('r-options');
+  cont.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    let cls = 'dim';
+    let icon = labels[i];
+    if (i === q.correct) { cls = 'correct'; icon = '✓'; }
+    else if (ra && i === ra.selected && !ra.isCorrect) { cls = 'wrong'; icon = '✗'; }
+    cont.innerHTML += `
+      <div class="option ${cls} disabled">
+        <span class="opt-label">${icon}</span>
+        <span class="opt-text">${opt}</span>
+      </div>`;
+  });
+
+  document.getElementById('r-exp-header').textContent = '💡 الشرح:';
+  document.getElementById('r-exp-text').textContent = q.explanation;
+
+  const tag = document.getElementById('r-result-tag');
+  if (ra) {
+    tag.textContent = ra.isCorrect ? '✅ أجبت بشكل صحيح' : '❌ إجابتك كانت: ' + q.options[ra.selected];
+    tag.style.color = ra.isCorrect ? '#10b981' : '#ef4444';
+  } else {
+    tag.textContent = '⏭ لم تجب على هذا السؤال';
+    tag.style.color = '#94a3b8';
+  }
+
+  document.getElementById('btn-prev').disabled = reviewIndex === 0;
+  document.getElementById('btn-next-r').disabled = reviewIndex === questions.length - 1;
+}
+
+function reviewPrev() { if (reviewIndex > 0) { reviewIndex--; renderReview(); } }
+function reviewNext() { if (reviewIndex < questions.length-1) { reviewIndex++; renderReview(); } }
+
+function restartQuiz() { startQuiz(); }
+</script>
+</body>
+</html>
